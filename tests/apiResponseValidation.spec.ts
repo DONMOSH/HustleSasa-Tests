@@ -9,12 +9,14 @@ test.describe("API Response Validation - Login Simulation", () => {
     page,
   }) => {
     let loginResponseStatus: number | null = null;
+    let securePageStatus: number | null = null;
 
-    // Capture API response from /authenticate
+    // Capture API response statuses
     page.on("response", async (response) => {
-      if (response.url().includes("/authenticate")) {
+      if (response.url().includes("/authenticate"))
         loginResponseStatus = response.status();
-      }
+      if (response.url().includes("/secure"))
+        securePageStatus = response.status();
     });
 
     await page.fill("#username", "tomsmith");
@@ -26,10 +28,11 @@ test.describe("API Response Validation - Login Simulation", () => {
       timeout: 5000,
     });
 
-    // Confirm API response was 303
+    // Validate API responses
     expect(loginResponseStatus).toBe(303);
+    expect(securePageStatus).toBe(200);
 
-    // Confirm final page URL
+    // Validate final URL
     expect(page.url()).toBe("https://the-internet.herokuapp.com/secure");
   });
 
@@ -37,12 +40,14 @@ test.describe("API Response Validation - Login Simulation", () => {
     page,
   }) => {
     let loginResponseStatus: number | null = null;
+    let loginPageStatus: number | null = null;
 
-    // Capture API response from /authenticate
+    // Capture API response statuses
     page.on("response", async (response) => {
-      if (response.url().includes("/authenticate")) {
+      if (response.url().includes("/authenticate"))
         loginResponseStatus = response.status();
-      }
+      if (response.url().includes("/login"))
+        loginPageStatus = response.status();
     });
 
     await page.fill("#username", "wronguser");
@@ -54,10 +59,11 @@ test.describe("API Response Validation - Login Simulation", () => {
       timeout: 5000,
     });
 
-    // Confirm API response was 303 (redirected back)
+    // Validate API responses
     expect(loginResponseStatus).toBe(303);
+    expect(loginPageStatus).toBe(200);
 
-    // Confirm final page URL remains /login
+    // Validate final URL remains /login
     expect(page.url()).toBe("https://the-internet.herokuapp.com/login");
 
     // Validate error message
